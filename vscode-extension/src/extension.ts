@@ -633,10 +633,11 @@ function getWebviewContent(reason: string, requestId: string): string {
     // 支持多张图片的数组
     let imageList = [];
     
-    // 检测Mac系统，更新快捷键提示
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+    // 检测Mac系统，更新快捷键提示（兼容多种检测方式）
+    const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac/i.test(navigator.userAgent);
     if (isMac) {
-      document.getElementById('pasteKey').textContent = '⌘';
+      const pasteKeyEl = document.getElementById('pasteKey');
+      if (pasteKeyEl) pasteKeyEl.textContent = '⌘';
     }
     
     // Focus textarea on load
