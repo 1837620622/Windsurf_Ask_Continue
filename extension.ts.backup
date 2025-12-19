@@ -384,581 +384,256 @@ function getWebviewContent(reason: string, requestId: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ask Continue</title>
+  <title>继续对话?</title>
   <style>
-    /* ========== 基础样式重置 ========== */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
-    /* ========== 主体背景与动画 ========== */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-      padding: 24px;
-      color: #e4e4e7;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      padding: 20px;
+      color: var(--vscode-foreground, #cccccc);
+      background-color: var(--vscode-editor-background, #1e1e1e);
       min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
     }
-    
-    /* 科技感背景网格 */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: 
-        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    
-    /* ========== 主容器 ========== */
     .container {
-      max-width: 520px;
+      max-width: 600px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
     }
-    
-    /* ========== 头部区域 ========== */
     .header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 24px;
-      padding: 16px 0;
-      position: relative;
-    }
-    
-    .header::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
-    }
-    
-    .logo {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-      animation: pulse-glow 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
-      50% { box-shadow: 0 4px 25px rgba(139, 92, 246, 0.6); }
-    }
-    
-    .header-text h1 {
-      font-size: 20px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #e4e4e7, #a5b4fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.5px;
-    }
-    
-    .header-text .subtitle {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 2px;
-    }
-    
-    /* ========== 状态标签 ========== */
-    .status-badge {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      background: linear-gradient(135deg, #f59e0b, #f97316);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
-      animation: badge-pulse 1.5s ease-in-out infinite;
-    }
-    
-    @keyframes badge-pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
-    }
-    
-    /* ========== 原因卡片 ========== */
-    .reason-card {
-      background: rgba(30, 30, 46, 0.8);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 12px;
-      padding: 16px;
+      gap: 10px;
       margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--vscode-panel-border, #454545);
     }
-    
-    .reason-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(180deg, #6366f1, #a855f7);
+    .header-icon {
+      font-size: 24px;
     }
-    
-    .reason-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--vscode-foreground, #cccccc);
     }
-    
-    .reason-icon {
-      font-size: 16px;
+    .reason-box {
+      background-color: var(--vscode-textBlockQuote-background, #2d2d2d);
+      border-left: 3px solid var(--vscode-textLink-foreground, #3794ff);
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 0 4px 4px 0;
     }
-    
     .reason-label {
       font-size: 12px;
-      font-weight: 600;
-      color: #a5b4fc;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: var(--vscode-descriptionForeground, #888888);
+      margin-bottom: 5px;
     }
-    
     .reason-text {
       font-size: 14px;
-      line-height: 1.6;
-      color: #d1d5db;
-      padding-left: 4px;
+      line-height: 1.5;
     }
-    
-    /* ========== 输入区域 ========== */
     .input-section {
       margin-bottom: 20px;
     }
-    
     .input-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: block;
       font-size: 13px;
-      font-weight: 500;
-      color: #e4e4e7;
-      margin-bottom: 10px;
+      color: var(--vscode-foreground, #cccccc);
+      margin-bottom: 8px;
     }
-    
-    .input-label .icon {
-      font-size: 14px;
-    }
-    
     .optional {
-      color: #6b7280;
-      font-weight: 400;
-      font-size: 12px;
+      color: var(--vscode-descriptionForeground, #888888);
+      font-weight: normal;
     }
-    
     textarea {
       width: 100%;
-      min-height: 110px;
-      padding: 14px 16px;
-      font-family: inherit;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #e4e4e7;
-      background: rgba(30, 30, 46, 0.6);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 10px;
+      min-height: 120px;
+      padding: 12px;
+      font-family: var(--vscode-editor-font-family, 'Consolas', monospace);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--vscode-input-foreground, #cccccc);
+      background-color: var(--vscode-input-background, #3c3c3c);
+      border: 1px solid var(--vscode-input-border, #3c3c3c);
+      border-radius: 4px;
       resize: vertical;
       outline: none;
-      transition: all 0.3s ease;
     }
-    
     textarea:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-      background: rgba(30, 30, 46, 0.8);
+      border-color: var(--vscode-focusBorder, #007fd4);
     }
-    
     textarea::placeholder {
-      color: #6b7280;
+      color: var(--vscode-input-placeholderForeground, #888888);
     }
-    
-    /* ========== 上传区域 ========== */
-    .upload-section {
-      margin-bottom: 20px;
-    }
-    
-    .upload-header {
+    .button-group {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
+      gap: 10px;
     }
-    
-    .upload-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    button {
+      flex: 1;
+      padding: 10px 20px;
       font-size: 13px;
       font-weight: 500;
-      color: #e4e4e7;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
-    
+    button:hover {
+      opacity: 0.9;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    .btn-primary {
+      background-color: var(--vscode-button-background, #0e639c);
+      color: var(--vscode-button-foreground, #ffffff);
+    }
+    .btn-secondary {
+      background-color: var(--vscode-button-secondaryBackground, #3a3d41);
+      color: var(--vscode-button-secondaryForeground, #ffffff);
+    }
+    .shortcuts {
+      margin-top: 15px;
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground, #888888);
+      text-align: center;
+    }
+    .shortcuts kbd {
+      background-color: var(--vscode-keybindingLabel-background, #464646);
+      border: 1px solid var(--vscode-keybindingLabel-border, #5a5a5a);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: inherit;
+    }
+    .upload-section {
+      margin-bottom: 15px;
+    }
     .upload-options {
       display: flex;
-      gap: 12px;
+      gap: 15px;
+      margin-bottom: 10px;
     }
-    
     .upload-options label {
       display: flex;
       align-items: center;
       gap: 5px;
       font-size: 12px;
-      color: #9ca3af;
+      color: var(--vscode-descriptionForeground, #888888);
       cursor: pointer;
-      transition: color 0.2s;
     }
-    
-    .upload-options label:hover {
-      color: #e4e4e7;
-    }
-    
-    .upload-options input[type="radio"] {
-      accent-color: #6366f1;
-    }
-    
-    .drop-zone {
-      background: rgba(30, 30, 46, 0.5);
-      border: 2px dashed rgba(99, 102, 241, 0.3);
-      border-radius: 12px;
-      padding: 24px 16px;
+    .upload-hint {
+      font-size: 12px;
+      color: var(--vscode-descriptionForeground, #888888);
       text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .drop-zone:hover {
-      border-color: rgba(99, 102, 241, 0.6);
-      background: rgba(99, 102, 241, 0.05);
-    }
-    
-    .drop-zone.dragover {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.1);
-      transform: scale(1.01);
-    }
-    
-    .drop-zone.has-files {
-      border-color: #10b981;
-      border-style: solid;
-      padding: 16px;
-    }
-    
-    .drop-text {
-      color: #9ca3af;
-      font-size: 13px;
-      line-height: 1.8;
-    }
-    
-    .drop-text .highlight {
-      color: #818cf8;
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    
-    .drop-text .highlight:hover {
-      color: #a5b4fc;
-      text-decoration: underline;
-    }
-    
-    .drop-text .kbd {
-      background: rgba(99, 102, 241, 0.2);
-      color: #a5b4fc;
-      padding: 2px 6px;
+      padding: 15px;
+      border: 1px dashed var(--vscode-panel-border, #454545);
       border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
     }
-    
-    .drop-hint {
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 8px;
+    .upload-hint:hover {
+      border-color: var(--vscode-focusBorder, #007fd4);
+      background-color: var(--vscode-list-hoverBackground, #2a2d2e);
     }
-    
-    /* ========== 文件预览网格 ========== */
-    .files-grid {
+    .upload-hint.has-image {
+      border-color: var(--vscode-textLink-foreground, #3794ff);
+      padding: 10px;
+    }
+    .images-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 12px;
-      justify-content: center;
+      margin-bottom: 8px;
     }
-    
-    .file-item {
+    .image-item {
       position: relative;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
+      display: inline-block;
     }
-    
-    .file-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-    }
-    
-    .file-item img {
-      max-width: 100px;
-      max-height: 80px;
+    .image-preview {
+      max-width: 120px;
+      max-height: 100px;
+      border-radius: 4px;
       object-fit: cover;
-      display: block;
     }
-    
-    .file-item .file-info {
+    .remove-single {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: var(--vscode-errorForeground, #f14c4c);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .remove-single:hover {
+      opacity: 0.8;
+    }
+    .image-info {
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground, #888888);
+    }
+    .file-preview {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 10px 12px;
-      min-width: 120px;
-      max-width: 160px;
+      padding: 8px 12px;
+      background: var(--vscode-editor-background, #1e1e1e);
+      border-radius: 4px;
+      max-width: 150px;
+      overflow: hidden;
     }
-    
-    .file-item .file-icon {
+    .file-icon {
       font-size: 24px;
       flex-shrink: 0;
     }
-    
-    .file-item .file-name {
+    .file-name {
       font-size: 11px;
-      color: #d1d5db;
+      color: var(--vscode-foreground, #cccccc);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    
-    .file-item .remove-btn {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      width: 20px;
-      height: 20px;
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-      border: 2px solid rgba(15, 15, 35, 0.8);
-      border-radius: 50%;
-      font-size: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s;
-      z-index: 10;
-    }
-    
-    .file-item .remove-btn:hover {
-      transform: scale(1.1);
-    }
-    
-    .files-info {
-      font-size: 12px;
-      color: #9ca3af;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    
-    .clear-all-btn {
-      background: rgba(239, 68, 68, 0.1);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin: 0 auto;
-    }
-    
-    .clear-all-btn:hover {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: rgba(239, 68, 68, 0.5);
-    }
-    
-    /* ========== 按钮组 ========== */
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    
-    .btn {
-      flex: 1;
-      padding: 14px 24px;
-      font-size: 14px;
-      font-weight: 600;
+    .remove-all {
+      background: var(--vscode-button-secondaryBackground, #3a3d41);
+      color: var(--vscode-button-secondaryForeground, #ffffff);
       border: none;
-      border-radius: 10px;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 11px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
+      margin-top: 8px;
     }
-    
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transition: left 0.5s;
-    }
-    
-    .btn:hover::before {
-      left: 100%;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-    }
-    
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-    
-    .btn-secondary {
-      background: rgba(55, 65, 81, 0.5);
-      color: #d1d5db;
-      border: 1px solid rgba(107, 114, 128, 0.3);
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(75, 85, 99, 0.5);
-      border-color: rgba(107, 114, 128, 0.5);
-    }
-    
-    /* ========== 快捷键提示 ========== */
-    .shortcuts {
-      text-align: center;
-      font-size: 11px;
-      color: #6b7280;
-      margin-bottom: 20px;
-    }
-    
-    .shortcuts kbd {
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 10px;
-      border: 1px solid rgba(99, 102, 241, 0.2);
-    }
-    
-    /* ========== 页脚 ========== */
-    .footer {
-      text-align: center;
-      padding-top: 16px;
-      border-top: 1px solid rgba(99, 102, 241, 0.1);
-    }
-    
-    .footer-text {
-      font-size: 11px;
-      color: #6b7280;
-    }
-    
-    .footer-text a {
-      color: #818cf8;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    
-    .footer-text a:hover {
-      color: #a5b4fc;
-    }
-    
-    .footer-star {
-      margin-top: 6px;
-      font-size: 11px;
-      color: #6b7280;
+    .remove-all:hover {
+      background: var(--vscode-button-secondaryHoverBackground, #45494e);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- 头部区域 -->
     <div class="header">
-      <div class="logo">🤖</div>
-      <div class="header-text">
-        <h1>Ask Continue</h1>
-        <div class="subtitle">智能对话助手</div>
-      </div>
-      <div class="status-badge">
-        <span>⚡</span>
-        <span>待处理</span>
-      </div>
+      <span class="header-icon">🔄</span>
+      <h1>继续对话?</h1>
     </div>
     
-    <!-- AI原因卡片 -->
-    <div class="reason-card">
-      <div class="reason-header">
-        <span class="reason-icon">💬</span>
-        <span class="reason-label">AI 工作进度</span>
-      </div>
-      <div class="reason-text">\${escapeHtml(reason)}</div>
+    <div class="reason-box">
+      <div class="reason-label">AI想要结束对话的原因:</div>
+      <div class="reason-text">${escapeHtml(reason)}</div>
     </div>
     
-    <!-- 输入区域 -->
     <div class="input-section">
       <label class="input-label">
-        <span class="icon">✏️</span>
-        如需继续，请输入新的指令 <span class="optional">(可选)</span>
+        如需继续，请输入新的指令 <span class="optional">(可选)</span>:
       </label>
       <textarea 
         id="userInput" 
@@ -967,58 +642,34 @@ function getWebviewContent(reason: string, requestId: string): string {
       ></textarea>
     </div>
 
-    <!-- 上传区域 -->
     <div class="upload-section">
-      <div class="upload-header">
-        <div class="upload-title">
-          <span>📎</span>
-          <span>上传文件 (可选)</span>
-        </div>
-        <div class="upload-options">
-          <label><input type="radio" name="uploadType" value="base64" checked> 文件内容</label>
-          <label><input type="radio" name="uploadType" value="path"> 仅路径</label>
-        </div>
+      <div class="upload-options">
+        <label>上传图片 (可选):</label>
+        <label><input type="radio" name="uploadType" value="base64" checked> 图片内容 (Base64)</label>
+        <label><input type="radio" name="uploadType" value="path"> 仅路径</label>
       </div>
-      <input type="file" id="fileInput" multiple style="display: none;" />
-      <div class="drop-zone" id="dropZone">
-        <div id="dropText" class="drop-text">
-          <span class="kbd"><span id="pasteKey">Ctrl</span>+V</span> 粘贴 &nbsp;|&nbsp; 拖拽文件 &nbsp;|&nbsp; <a href="#" id="selectFiles" class="highlight">点击选择</a>
-          <div class="drop-hint">支持从左侧文件资源管理器直接拖拽</div>
-        </div>
-        <div id="filePreviewContainer" style="display: none;">
-          <div class="files-grid" id="filesGrid"></div>
-          <div class="files-info" id="filesInfo"></div>
-          <button type="button" class="clear-all-btn" id="clearAllBtn">
-            <span>🗑️</span>
-            <span>清空全部</span>
-          </button>
+      <div class="upload-hint" id="dropZone">
+        <span id="dropText">📋 <span id="pasteKey">Ctrl</span>+V 粘贴图片 或 拖拽文件到此处<br><small style="opacity: 0.7;">支持从左侧文件资源管理器直接拖拽</small></span>
+        <div id="imagePreviewContainer" style="display: none;">
+          <div class="images-grid" id="imagesGrid"></div>
+          <div class="image-info" id="imageInfo"></div>
+          <button type="button" class="remove-all" id="removeAllImages">✕ 移除全部图片</button>
         </div>
       </div>
     </div>
     
-    <!-- 按钮组 -->
     <div class="button-group">
-      <button class="btn btn-primary" id="continueBtn">
-        <span>🚀</span>
-        <span>继续执行</span>
-      </button>
-      <button class="btn btn-secondary" id="endBtn">
-        <span>⭕</span>
-        <span>结束对话</span>
-      </button>
+      <button class="btn-primary" id="continueBtn">▶ 继续执行</button>
+      <button class="btn-secondary" id="endBtn">■ 结束对话</button>
     </div>
     
-    <!-- 快捷键提示 -->
     <div class="shortcuts">
-      快捷键: <kbd>Enter</kbd> 继续 &nbsp;|&nbsp; <kbd>Shift+Enter</kbd> 换行 &nbsp;|&nbsp; <kbd>Esc</kbd> 结束
+      快捷键: <kbd>Enter</kbd> = 继续 | <kbd>Shift</kbd>+<kbd>Enter</kbd> = 换行 | <kbd>Esc</kbd> = 结束
     </div>
     
-    <!-- 页脚 -->
-    <div class="footer">
-      <div class="footer-text">
-        二次开发 by <a href="https://github.com/1837620622" target="_blank">@1837620622</a>
-      </div>
-      <div class="footer-star">如果觉得好用，请给个 ⭐ Star</div>
+    <div class="footer" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--vscode-panel-border, #454545); font-size: 11px; color: var(--vscode-descriptionForeground, #888888); text-align: center;">
+      <div>二次开发 by <a href="https://github.com/1837620622" target="_blank" style="color: var(--vscode-textLink-foreground, #3794ff);">@1837620622</a></div>
+      <div style="margin-top: 5px;">如果觉得好用，请给个 ⭐ Star</div>
     </div>
   </div>
   
@@ -1029,37 +680,20 @@ function getWebviewContent(reason: string, requestId: string): string {
     const endBtn = document.getElementById('endBtn');
     const dropZone = document.getElementById('dropZone');
     const dropText = document.getElementById('dropText');
-    const filePreviewContainer = document.getElementById('filePreviewContainer');
-    const filesGrid = document.getElementById('filesGrid');
-    const filesInfo = document.getElementById('filesInfo');
-    const clearAllBtn = document.getElementById('clearAllBtn');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagesGrid = document.getElementById('imagesGrid');
+    const imageInfo = document.getElementById('imageInfo');
+    const removeAllBtn = document.getElementById('removeAllImages');
     
-    // 支持多种文件的数组
-    let fileList = [];
+    // 支持多张图片和文件的数组
+    let imageList = [];
+    let fileList = [];  // 非图片文件列表
     
-    // 文件选择器
-    const fileInput = document.getElementById('fileInput');
-    const selectFilesLink = document.getElementById('selectFiles');
-    
-    selectFilesLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      fileInput.click();
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          handleFile(files[i]);
-        }
-      }
-      fileInput.value = ''; // 清空以便重复选择
-    });
-    
-    // 检测Mac系统，更新快捷键提示
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+    // 检测Mac系统，更新快捷键提示（兼容多种检测方式）
+    const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac/i.test(navigator.userAgent);
     if (isMac) {
-      document.getElementById('pasteKey').textContent = '⌘';
+      const pasteKeyEl = document.getElementById('pasteKey');
+      if (pasteKeyEl) pasteKeyEl.textContent = '⌘';
     }
     
     // Focus textarea on load
@@ -1076,22 +710,22 @@ function getWebviewContent(reason: string, requestId: string): string {
       }
     });
     
-    // Handle paste event - 支持粘贴图片和文件
+    // Handle paste event for images (Ctrl+V / Cmd+V) - 支持粘贴多张图片
     document.addEventListener('paste', (e) => {
       const items = e.clipboardData?.items;
       if (!items) return;
       
-      let hasFile = false;
+      let hasImage = false;
       for (const item of items) {
-        if (item.kind === 'file') {
-          hasFile = true;
+        if (item.type.startsWith('image/')) {
+          hasImage = true;
           const file = item.getAsFile();
           if (file) {
-            handleFile(file);
+            handleImageFile(file);
           }
         }
       }
-      if (hasFile) {
+      if (hasImage) {
         e.preventDefault();
       }
     });
@@ -1099,18 +733,23 @@ function getWebviewContent(reason: string, requestId: string): string {
     // Handle drag and drop
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropZone.classList.add('dragover');
+      dropZone.style.borderColor = 'var(--vscode-focusBorder, #007fd4)';
+      dropZone.style.backgroundColor = 'var(--vscode-list-hoverBackground, #2a2d2e)';
     });
     
     dropZone.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      dropZone.classList.remove('dragover');
+      if (imageList.length === 0) {
+        dropZone.style.borderColor = '';
+        dropZone.style.backgroundColor = '';
+      }
     });
     
-    // 拖拽放下 - 支持多种文件和从文件资源管理器拖拽
+    // 拖拽放下 - 支持多张图片和从文件资源管理器拖拽
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropZone.classList.remove('dragover');
+      dropZone.style.borderColor = '';
+      dropZone.style.backgroundColor = '';
       
       // 尝试获取 VS Code 资源管理器拖拽的文件 URI
       const uriList = e.dataTransfer?.getData('text/uri-list');
@@ -1126,7 +765,12 @@ function getWebviewContent(reason: string, requestId: string): string {
       const files = e.dataTransfer?.files;
       if (files && files.length > 0) {
         for (let i = 0; i < files.length; i++) {
-          handleFile(files[i]);
+          const file = files[i];
+          if (file.type.startsWith('image/')) {
+            handleImageFile(file);
+          } else {
+            handleNonImageFile(file);
+          }
         }
       }
     });
@@ -1144,116 +788,145 @@ function getWebviewContent(reason: string, requestId: string): string {
       const ext = fileName.split('.').pop()?.toLowerCase() || '';
       
       // 判断是否为图片
-      if (isImage(fileName)) {
+      const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg', 'ico'];
+      if (imageExts.includes(ext)) {
         // 图片文件：发送消息给扩展读取文件内容
         vscode.postMessage({ command: 'readFile', path: filePath, type: 'image' });
       } else {
-        // 非图片文件：直接添加到列表
+        // 非图片文件
         const fileData = {
           path: filePath,
           name: fileName,
-          size: 0,
-          type: '',
-          isImage: false,
-          id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+          ext: ext,
+          id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+          icon: getFileIcon(ext)
         };
         fileList.push(fileData);
-        updateFilePreview();
+        updateImagePreview();
       }
     }
     
-    // 获取文件图标
-    function getFileIcon(fileName) {
-      const ext = fileName.split('.').pop().toLowerCase();
-      const icons = {
-        'pdf': '📄', 'doc': '📝', 'docx': '📝', 'txt': '📃',
-        'xls': '📊', 'xlsx': '📊', 'csv': '📊',
-        'ppt': '📽️', 'pptx': '📽️',
-        'zip': '📦', 'rar': '📦', '7z': '📦', 'tar': '📦', 'gz': '📦',
-        'js': '💻', 'ts': '💻', 'py': '🐍', 'java': '☕', 'c': '💻', 'cpp': '💻', 'h': '💻',
-        'html': '🌐', 'css': '🎨', 'json': '📋', 'xml': '📋', 'yaml': '📋', 'yml': '📋',
-        'md': '📖', 'log': '📜',
-        'png': '🖼️', 'jpg': '🖼️', 'jpeg': '🖼️', 'gif': '🖼️', 'svg': '🖼️', 'webp': '🖼️', 'bmp': '🖼️',
-        'mp3': '🎵', 'wav': '🎵', 'mp4': '🎬', 'avi': '🎬', 'mov': '🎬'
+    // 处理非图片文件
+    function handleNonImageFile(file) {
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      const fileData = {
+        path: file.path || '',
+        name: file.name,
+        ext: ext,
+        size: file.size,
+        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        icon: getFileIcon(ext)
       };
-      return icons[ext] || '📁';
+      fileList.push(fileData);
+      updateImagePreview();
     }
     
-    // 判断是否为图片
-    function isImage(fileName) {
-      const ext = fileName.split('.').pop().toLowerCase();
-      return ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext);
+    // 根据文件扩展名获取图标
+    function getFileIcon(ext) {
+      const icons = {
+        // 代码文件
+        'js': '📜', 'ts': '📘', 'jsx': '⚛️', 'tsx': '⚛️',
+        'py': '🐍', 'java': '☕', 'c': '🔧', 'cpp': '🔧', 'h': '🔧',
+        'cs': '🎯', 'go': '🔵', 'rs': '🦀', 'rb': '💎',
+        'php': '🐘', 'swift': '🍎', 'kt': '🎨', 'scala': '🔴',
+        'vue': '💚', 'svelte': '🔥', 'html': '🌐', 'css': '🎨',
+        'scss': '🎨', 'less': '🎨', 'json': '📋', 'xml': '📄',
+        'yaml': '📝', 'yml': '📝', 'toml': '⚙️', 'ini': '⚙️',
+        'sql': '🗃️', 'sh': '🖥️', 'bash': '🖥️', 'zsh': '🖥️',
+        'ps1': '🖥️', 'bat': '🖥️', 'cmd': '🖥️',
+        // 文档
+        'md': '📝', 'txt': '📄', 'doc': '📄', 'docx': '📄',
+        'pdf': '📕', 'xls': '📊', 'xlsx': '📊', 'ppt': '📽️', 'pptx': '📽️',
+        'csv': '📊', 'rtf': '📄',
+        // 压缩包
+        'zip': '📦', 'rar': '📦', 'tar': '📦', 'gz': '📦', '7z': '📦',
+        // 配置
+        'env': '🔒', 'gitignore': '🚫', 'dockerfile': '🐳',
+        'makefile': '🔨', 'cmake': '🔨'
+      };
+      return icons[ext] || '📄';
     }
     
-    // 处理单个文件 - 添加到文件列表
-    function handleFile(file) {
+    // 处理单个图片文件 - 添加到图片列表
+    function handleImageFile(file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const fileData = {
+        const imageData = {
           base64: e.target.result,
           name: file.name,
           size: file.size,
-          type: file.type,
-          isImage: file.type.startsWith('image/'),
           id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
         };
-        fileList.push(fileData);
-        updateFilePreview();
+        imageList.push(imageData);
+        updateImagePreview();
       };
       reader.readAsDataURL(file);
     }
     
-    // 更新文件预览区域
-    function updateFilePreview() {
-      if (fileList.length === 0) {
+    // 更新图片和文件预览区域
+    function updateImagePreview() {
+      const totalItems = imageList.length + fileList.length;
+      
+      if (totalItems === 0) {
         dropText.style.display = 'block';
-        filePreviewContainer.style.display = 'none';
-        dropZone.classList.remove('has-files');
-        filesGrid.innerHTML = '';
-        filesInfo.textContent = '';
+        imagePreviewContainer.style.display = 'none';
+        dropZone.classList.remove('has-image');
+        imagesGrid.innerHTML = '';
+        imageInfo.textContent = '';
       } else {
         dropText.style.display = 'none';
-        filePreviewContainer.style.display = 'block';
-        dropZone.classList.add('has-files');
+        imagePreviewContainer.style.display = 'block';
+        dropZone.classList.add('has-image');
         
-        // 生成文件预览HTML
-        filesGrid.innerHTML = fileList.map((file, index) => {
-          if (file.isImage && file.base64) {
-            return '<div class="file-item" data-id="' + file.id + '">' +
-              '<img src="' + file.base64 + '" title="' + file.name + '" />' +
-              '<button type="button" class="remove-btn" data-index="' + index + '">✕</button>' +
-            '</div>';
-          } else {
-            return '<div class="file-item" data-id="' + file.id + '">' +
-              '<div class="file-info" title="' + (file.path || file.name) + '">' +
-                '<span class="file-icon">' + getFileIcon(file.name) + '</span>' +
-                '<span class="file-name">' + file.name + '</span>' +
-              '</div>' +
-              '<button type="button" class="remove-btn" data-index="' + index + '">✕</button>' +
-            '</div>';
-          }
-        }).join('');
+        // 生成图片预览HTML
+        let previewHtml = '';
+        
+        // 图片预览
+        previewHtml += imageList.map((img, index) => 
+          '<div class="image-item" data-id="' + img.id + '" data-type="image">' +
+            '<img src="' + img.base64 + '" class="image-preview" title="' + img.name + '" />' +
+            '<button type="button" class="remove-single" data-type="image" data-index="' + index + '">✕</button>' +
+          '</div>'
+        ).join('');
+        
+        // 文件预览
+        previewHtml += fileList.map((file, index) => 
+          '<div class="image-item" data-id="' + file.id + '" data-type="file">' +
+            '<div class="file-preview" title="' + (file.path || file.name) + '">' +
+              '<span class="file-icon">' + file.icon + '</span>' +
+              '<span class="file-name">' + file.name + '</span>' +
+            '</div>' +
+            '<button type="button" class="remove-single" data-type="file" data-index="' + index + '">✕</button>' +
+          '</div>'
+        ).join('');
+        
+        imagesGrid.innerHTML = previewHtml;
         
         // 显示数量统计
-        const imageCount = fileList.filter(f => f.isImage).length;
-        const otherCount = fileList.length - imageCount;
-        const totalSize = fileList.reduce((sum, f) => sum + (f.size || 0), 0);
-        let infoText = '共 ' + fileList.length + ' 个文件';
-        if (imageCount > 0 && otherCount > 0) {
-          infoText = imageCount + ' 张图片 + ' + otherCount + ' 个文件';
-        } else if (imageCount > 0) {
-          infoText = imageCount + ' 张图片';
+        let infoText = '';
+        if (imageList.length > 0) {
+          const totalImgSize = imageList.reduce((sum, img) => sum + (img.size || 0), 0);
+          infoText += imageList.length + ' 张图片';
+          if (totalImgSize > 0) infoText += ' (' + formatFileSize(totalImgSize) + ')';
         }
-        if (totalSize > 0) infoText += ' (' + formatFileSize(totalSize) + ')';
-        filesInfo.textContent = infoText;
+        if (fileList.length > 0) {
+          if (infoText) infoText += ' + ';
+          infoText += fileList.length + ' 个文件';
+        }
+        imageInfo.textContent = infoText;
         
         // 绑定单个删除按钮事件
-        filesGrid.querySelectorAll('.remove-btn').forEach(btn => {
+        imagesGrid.querySelectorAll('.remove-single').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            const type = btn.getAttribute('data-type');
             const index = parseInt(btn.getAttribute('data-index'));
-            fileList.splice(index, 1);
-            updateFilePreview();
+            if (type === 'image') {
+              imageList.splice(index, 1);
+            } else {
+              fileList.splice(index, 1);
+            }
+            updateImagePreview();
           });
         });
       }
@@ -1264,16 +937,14 @@ function getWebviewContent(reason: string, requestId: string): string {
       const message = event.data;
       if (message.command === 'fileContent') {
         if (message.type === 'image' && message.base64) {
-          const fileData = {
+          const imageData = {
             base64: message.base64,
             name: message.name,
             size: message.size || 0,
-            type: 'image',
-            isImage: true,
             id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
           };
-          fileList.push(fileData);
-          updateFilePreview();
+          imageList.push(imageData);
+          updateImagePreview();
         }
       }
     });
@@ -1285,11 +956,12 @@ function getWebviewContent(reason: string, requestId: string): string {
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
     
-    // 移除全部文件
-    clearAllBtn.addEventListener('click', (e) => {
+    // 移除全部图片和文件
+    removeAllBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      imageList = [];
       fileList = [];
-      updateFilePreview();
+      updateImagePreview();
     });
     
     // Button handlers
@@ -1299,23 +971,29 @@ function getWebviewContent(reason: string, requestId: string): string {
     function submitContinue() {
       let text = textarea.value.trim();
       
-      // 如果有文件，将所有文件信息附加到消息中
-      if (fileList.length > 0) {
+      // 如果有图片，将所有图片以Markdown格式附加到消息中（便于AI识别和显示）
+      if (imageList.length > 0) {
         const uploadType = document.querySelector('input[name="uploadType"]:checked')?.value || 'base64';
         if (uploadType === 'base64') {
-          const filesText = fileList.map((f, i) => {
-            const icon = f.isImage ? '🖼️' : getFileIcon(f.name);
-            return '[已上传' + icon + ' ' + (i + 1) + ': ' + f.name + ' (' + formatFileSize(f.size) + ')]';
-          }).join('\\n');
-          text = (text ? text + '\\n\\n' : '') + filesText;
+          const imagesText = imageList.map((img, i) => 
+            '[已上传图片 ' + (i + 1) + ': ' + img.name + ' (' + formatFileSize(img.size) + ')]'
+          ).join('\\n');
+          // 图片base64数据通过postMessage传递，不在文本中显示
+          text = (text ? text + '\\n\\n' : '') + imagesText;
         }
       }
       
-      // 传递文件数据给扩展后端处理
-      const images = fileList.filter(f => f.isImage).map(f => ({ name: f.name, base64: f.base64, size: f.size }));
-      const hasImage = images.length > 0;
+      // 传递图片和文件数据给扩展后端处理
+      const images = imageList.map(img => ({ name: img.name, base64: img.base64, size: img.size }));
+      const files = fileList.map(f => ({ name: f.name, path: f.path, ext: f.ext }));
       
-      vscode.postMessage({ command: 'continue', text: text || '继续', hasImage: hasImage, imageCount: images.length, images: images });
+      // 附加文件路径信息到文本
+      if (fileList.length > 0) {
+        const filesText = fileList.map((f, i) => '[文件 ' + (i + 1) + ': ' + f.name + '] 路径: ' + f.path).join('\\n');
+        text = (text ? text + '\\n\\n' : '') + filesText;
+      }
+      
+      vscode.postMessage({ command: 'continue', text: text || '继续', hasImage: imageList.length > 0, imageCount: imageList.length, images: images, files: files });
     }
     
     function submitEnd() {
