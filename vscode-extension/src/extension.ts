@@ -333,6 +333,56 @@ async function showAskContinueDialog(request: AskRequest): Promise<void> {
             // Ignore errors on cancel
           }
           break;
+        case "readFile":
+          try {
+            // 处理从文件资源管理器拖拽的文件
+            const fileUri = message.uri;
+            let filePath = fileUri;
+            
+            // 处理不同格式的 URI
+            if (fileUri.startsWith('file://')) {
+              filePath = fileUri.replace('file://', '');
+              // Windows 路径处理
+              if (process.platform === 'win32' && filePath.startsWith('/')) {
+                filePath = filePath.substring(1);
+              }
+            }
+            
+            // 读取文件
+            const fileBuffer = await fs.promises.readFile(filePath);
+            const fileName = path.basename(filePath);
+            const fileStats = await fs.promises.stat(filePath);
+            
+            // 判断文件类型
+            const isImage = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(fileName);
+            
+            // 转换为 base64
+            const base64Data = fileBuffer.toString('base64');
+            const mimeType = isImage ? `image/${path.extname(fileName).substring(1).toLowerCase()}` : 'application/octet-stream';
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            
+            // 发送文件数据回 webview
+            panel.webview.postMessage({
+              command: 'fileLoaded',
+              file: {
+                base64: dataUrl,
+                name: fileName,
+                size: fileStats.size,
+                type: mimeType,
+                isImage: isImage,
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+              }
+            });
+          } catch (error) {
+            vscode.window.showErrorMessage(
+              `读取文件失败: ${error instanceof Error ? error.message : "未知错误"}`
+            );
+            panel.webview.postMessage({
+              command: 'fileLoadError',
+              error: error instanceof Error ? error.message : "未知错误"
+            });
+          }
+          break;
       }
     },
     undefined,
@@ -575,6 +625,31 @@ function getWebviewContent(reason: string, requestId: string): string {
     .remove-all:hover {
       background: var(--vscode-button-secondaryHoverBackground, #45494e);
     }
+    .file-item .file-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      background: var(--vscode-editor-background, #1e1e1e);
+      border: 1px solid var(--vscode-widget-border, #454545);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .file-item .file-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+    .file-item .file-name {
+      font-size: 10px;
+      color: var(--vscode-descriptionForeground, #cccccc);
+      word-break: break-all;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -607,7 +682,7 @@ function getWebviewContent(reason: string, requestId: string): string {
         <label><input type="radio" name="uploadType" value="path"> 仅路径</label>
       </div>
       <div class="upload-hint" id="dropZone">
-        <span id="dropText">📋 <span id="pasteKey">Ctrl</span>+V 粘贴图片 或 拖拽多张图片到此处 (支持多选)</span>
+        <span id="dropText">📋 <span id="pasteKey">Ctrl</span>+V 粘贴图片 或 拖拽文件到此处<br>📁 支持从左侧文件资源管理器直接拖拽 | 🖼️ 支持多种文件类型</span>
         <div id="imagePreviewContainer" style="display: none;">
           <div class="images-grid" id="imagesGrid"></div>
           <div class="image-info" id="imageInfo"></div>
@@ -645,6 +720,22 @@ function getWebviewContent(reason: string, requestId: string): string {
     
     // 支持多张图片的数组
     let imageList = [];
+    
+    // 监听来自扩展主进程的消息
+    window.addEventListener('message', event => {
+      const message = event.data;
+      switch (message.command) {
+        case 'fileLoaded':
+          // 文件加载成功，添加到列表
+          imageList.push(message.file);
+          updateImagePreview();
+          break;
+        case 'fileLoadError':
+          // 文件加载失败，显示错误
+          alert('文件加载失败: ' + message.error);
+          break;
+      }
+    });
     
     // 检测Mac系统，更新快捷键提示（兼容多种检测方式）
     const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac/i.test(navigator.userAgent);
@@ -702,12 +793,13 @@ function getWebviewContent(reason: string, requestId: string): string {
       }
     });
     
-    // 拖拽放下 - 支持多张图片
+    // 拖拽放下 - 支持多张图片和文件资源管理器拖拽
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.style.borderColor = '';
       dropZone.style.backgroundColor = '';
       
+      // 处理外部文件拖拽
       const files = e.dataTransfer?.files;
       if (files && files.length > 0) {
         // 遍历所有文件，处理每张图片
@@ -715,8 +807,44 @@ function getWebviewContent(reason: string, requestId: string): string {
           const file = files[i];
           if (file.type.startsWith('image/')) {
             handleImageFile(file);
+          } else {
+            // 处理其他类型文件
+            handleNonImageFile(file);
           }
         }
+        return;
+      }
+      
+      // 处理 VSCode 内部文件拖拽（从文件资源管理器）
+      const textData = e.dataTransfer?.getData('text/plain');
+      if (textData) {
+        try {
+          // VSCode 拖拽时会传递文件路径信息
+          const draggedData = JSON.parse(textData);
+          if (draggedData && draggedData.length > 0) {
+            draggedData.forEach(item => {
+              if (item.uri) {
+                handleVSCodeFileDrop(item.uri);
+              }
+            });
+          }
+        } catch (error) {
+          // 如果不是 JSON 格式，可能是简单的文件路径
+          if (textData.startsWith('file://') || textData.includes('/') || textData.includes('\\')) {
+            handleVSCodeFileDrop(textData);
+          }
+        }
+      }
+      
+      // 处理 VSCode URI 格式的拖拽数据
+      const uriListData = e.dataTransfer?.getData('text/uri-list');
+      if (uriListData) {
+        const uris = uriListData.split('\n').filter(uri => uri.trim());
+        uris.forEach(uri => {
+          if (uri.startsWith('file://')) {
+            handleVSCodeFileDrop(uri);
+          }
+        });
       }
     });
     
@@ -736,6 +864,32 @@ function getWebviewContent(reason: string, requestId: string): string {
       reader.readAsDataURL(file);
     }
     
+    // 处理非图片文件
+    function handleNonImageFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const fileData = {
+          base64: e.target.result,
+          name: file.name,
+          size: file.size,
+          type: file.type || 'application/octet-stream',
+          id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        };
+        imageList.push(fileData); // 复用 imageList，但实际上是文件列表
+        updateImagePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // 处理 VSCode 文件资源管理器拖拽
+    function handleVSCodeFileDrop(uri) {
+      // 发送消息给扩展主进程，请求读取文件
+      vscode.postMessage({
+        command: 'readFile',
+        uri: uri
+      });
+    }
+    
     // 更新图片预览区域
     function updateImagePreview() {
       if (imageList.length === 0) {
@@ -749,17 +903,41 @@ function getWebviewContent(reason: string, requestId: string): string {
         imagePreviewContainer.style.display = 'block';
         dropZone.classList.add('has-image');
         
-        // 生成图片预览HTML
-        imagesGrid.innerHTML = imageList.map((img, index) => 
-          '<div class="image-item" data-id="' + img.id + '">' +
-            '<img src="' + img.base64 + '" class="image-preview" title="' + img.name + '" />' +
-            '<button type="button" class="remove-single" data-index="' + index + '">✕</button>' +
-          '</div>'
-        ).join('');
+        // 生成文件预览HTML（支持图片和其他文件）
+        imagesGrid.innerHTML = imageList.map((file, index) => {
+          const isImage = file.isImage !== undefined ? file.isImage : file.base64.startsWith('data:image/');
+          const fileIcon = getFileIcon(file.name, isImage);
+          
+          if (isImage) {
+            return '<div class="image-item" data-id="' + file.id + '">' +
+              '<img src="' + file.base64 + '" class="image-preview" title="' + file.name + '" />' +
+              '<button type="button" class="remove-single" data-index="' + index + '">✕</button>' +
+            '</div>';
+          } else {
+            return '<div class="image-item file-item" data-id="' + file.id + '">' +
+              '<div class="file-preview" title="' + file.name + '">' +
+                '<div class="file-icon">' + fileIcon + '</div>' +
+                '<div class="file-name">' + file.name + '</div>' +
+              '</div>' +
+              '<button type="button" class="remove-single" data-index="' + index + '">✕</button>' +
+            '</div>';
+          }
+        }).join('');
         
-        // 显示图片数量和总大小
-        const totalSize = imageList.reduce((sum, img) => sum + img.size, 0);
-        imageInfo.textContent = '共 ' + imageList.length + ' 张图片 (' + formatFileSize(totalSize) + ')';
+        // 显示文件数量和总大小
+        const totalSize = imageList.reduce((sum, file) => sum + file.size, 0);
+        const imageCount = imageList.filter(file => file.isImage !== undefined ? file.isImage : file.base64.startsWith('data:image/')).length;
+        const fileCount = imageList.length - imageCount;
+        
+        let infoText = '';
+        if (imageCount > 0 && fileCount > 0) {
+          infoText = '共 ' + imageCount + ' 张图片，' + fileCount + ' 个文件 (' + formatFileSize(totalSize) + ')';
+        } else if (imageCount > 0) {
+          infoText = '共 ' + imageCount + ' 张图片 (' + formatFileSize(totalSize) + ')';
+        } else {
+          infoText = '共 ' + fileCount + ' 个文件 (' + formatFileSize(totalSize) + ')';
+        }
+        imageInfo.textContent = infoText;
         
         // 绑定单个删除按钮事件
         imagesGrid.querySelectorAll('.remove-single').forEach(btn => {
@@ -771,6 +949,36 @@ function getWebviewContent(reason: string, requestId: string): string {
           });
         });
       }
+    }
+    
+    // 获取文件图标
+    function getFileIcon(fileName, isImage) {
+      if (isImage) return '🖼️';
+      
+      const ext = fileName.split('.').pop()?.toLowerCase() || '';
+      const iconMap = {
+        // 文档
+        'pdf': '📄', 'doc': '📝', 'docx': '📝', 'txt': '📝', 'rtf': '📝',
+        'md': '📝', 'markdown': '📝',
+        // 表格
+        'xls': '📊', 'xlsx': '📊', 'csv': '📊',
+        // 演示文稿
+        'ppt': '📊', 'pptx': '📊',
+        // 代码
+        'js': '💻', 'ts': '💻', 'py': '💻', 'java': '💻', 'cpp': '💻', 'c': '💻',
+        'html': '💻', 'css': '💻', 'php': '💻', 'rb': '💻', 'go': '💻',
+        'json': '💻', 'xml': '💻', 'yaml': '💻', 'yml': '💻',
+        // 压缩文件
+        'zip': '📦', 'rar': '📦', '7z': '📦', 'tar': '📦', 'gz': '📦',
+        // 音频
+        'mp3': '🎵', 'wav': '🎵', 'flac': '🎵', 'aac': '🎵',
+        // 视频
+        'mp4': '🎬', 'avi': '🎬', 'mov': '🎬', 'mkv': '🎬',
+        // 其他
+        'exe': '⚙️', 'dmg': '💿', 'iso': '💿'
+      };
+      
+      return iconMap[ext] || '📄';
     }
     
     // Format file size
