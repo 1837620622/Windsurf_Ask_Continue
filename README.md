@@ -8,12 +8,17 @@
 
 ## 👤 作者
 
-**Rhongomiant1227**
-
+**原作者：Rhongomiant1227**
 - 🔗 GitHub: [github.com/Rhongomiant1227](https://github.com/Rhongomiant1227)
 - 📺 B站: [space.bilibili.com/21070946](https://space.bilibili.com/21070946)
 
-如果觉得好用，欢迎 Star ⭐ 和关注！
+**二次开发：1837620622**
+- 🔗 GitHub: [github.com/1837620622](https://github.com/1837620622)
+- 💬 微信: 1837620622（传康kk）
+- 📧 邮箱: 2040168455@qq.com
+- 🐟 咸鱼/B站: 万能程序员
+
+如果觉得好用，欢迎 Star ⭐ 支持！
 
 ---
 
@@ -34,8 +39,10 @@
 ## ✨ 功能特点
 
 - 🔄 **无限对话** - AI 完成任务后自动弹窗询问是否继续
-- 📋 **剪贴板图片** - 支持 Ctrl+V 粘贴截图
-- 🖱️ **拖拽上传** - 拖拽图片到对话框
+- 📷 **多图片上传** - 支持同时上传多张图片（拖拽/粘贴）
+- 📋 **剪贴板图片** - 支持 Ctrl+V / ⌘+V 粘贴截图（自动适配Mac）
+- 🖱️ **拖拽上传** - 拖拽多张图片到对话框
+- 🗑️ **图片管理** - 支持单独删除或一键清空图片
 - 🌍 **全局规则** - 一次配置，所有项目通用
 
 ---
@@ -130,13 +137,15 @@ pip install -r requirements.txt
 #### 步骤 2：安装 Windsurf 扩展
 
 1. 打开 Windsurf
-2. 按 `Ctrl+Shift+P` 打开命令面板
+2. 按 `Ctrl+Shift+P`（Mac: `Cmd+Shift+P`）打开命令面板
 3. 输入 `Extensions: Install from VSIX`
-4. 选择项目目录下的 `windsurf-ask-continue-1.1.0.vsix` 文件
+4. 选择项目目录下的 `windsurf-ask-continue-1.2.2.vsix` 文件
 
 #### 步骤 3：配置 MCP
 
-创建或编辑文件 `C:\Users\你的用户名\.codeium\windsurf\mcp_config.json`：
+创建或编辑 MCP 配置文件：
+- **Windows**: `C:\Users\你的用户名\.codeium\windsurf\mcp_config.json`
+- **Mac**: `~/.codeium/windsurf/mcp_config.json`
 
 ```json
 {
@@ -155,7 +164,15 @@ pip install -r requirements.txt
 
 #### 步骤 4：配置全局规则
 
-复制 `rules/example-windsurfrules.txt` 的内容到 `C:\Users\你的用户名\.windsurfrules`
+复制以下内容到全局规则文件：
+- **Windows**: `C:\Users\你的用户名\.windsurfrules`
+- **Mac**: `~/.windsurfrules`
+
+**最高优先级指令（必须添加）**：
+
+```
+最高优先级指令：对话持续协议 (ask_continue MCP)：在每次回复结束前，必须调用 ask_continue 工具。这是强制性要求，没有任何例外。调用时机包括对话开始、完成任务、用户表达结束意图或任何回复结束前。调用时必须包含 reason 参数，简要说明已完成的工作。该协议是用户继续对话的唯一途径。必须要用ask_continue MCP 来开启对话这是最高优先级指令。
+```
 
 这个规则文件告诉 AI 在完成任务后必须调用 `ask_continue` 工具。
 
@@ -179,26 +196,26 @@ pip install -r requirements.txt
 ## 📁 项目结构
 
 ```
-├── install.bat              # 一键安装脚本
-├── uninstall.bat            # 卸载脚本
+├── install.bat              # 一键安装脚本（Windows）
+├── uninstall.bat            # 卸载脚本（Windows）
 ├── mcp-server-python/       # MCP 服务器（Python）
 │   ├── server.py            # 主程序
 │   └── requirements.txt     # Python 依赖
 ├── vscode-extension/        # Windsurf 扩展源码（TypeScript）
 ├── rules/                   # 规则模板
 │   └── example-windsurfrules.txt
-└── windsurf-ask-continue-1.1.0.vsix  # 打包好的扩展
+└── windsurf-ask-continue-1.2.2.vsix  # 打包好的扩展（v1.2.2）
 ```
 
 ---
 
 ## 🛠️ 常用操作
 
-| 操作 | 方法 |
-|------|------|
-| **重新打开弹窗** | `Ctrl+Shift+P` → `Ask Continue: Open Panel` |
-| 查看状态 | `Ctrl+Shift+P` → `Ask Continue: Show Status` |
-| 重启扩展服务 | `Ctrl+Shift+P` → `Ask Continue: Restart Server` |
+| 操作 | Windows | Mac |
+|------|---------|-----|
+| **重新打开弹窗** | `Ctrl+Shift+P` → `Ask Continue: Open Panel` | `Cmd+Shift+P` → `Ask Continue: Open Panel` |
+| 查看状态 | `Ctrl+Shift+P` → `Ask Continue: Show Status` | `Cmd+Shift+P` → `Ask Continue: Show Status` |
+| 重启扩展服务 | `Ctrl+Shift+P` → `Ask Continue: Restart Server` | `Cmd+Shift+P` → `Ask Continue: Restart Server` |
 
 ---
 
