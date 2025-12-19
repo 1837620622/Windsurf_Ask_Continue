@@ -105,7 +105,8 @@ def start_callback_server():
             server.serve_forever()
             break
         except OSError as e:
-            if e.errno == 10048:  # Windows: 端口被占用
+            # 端口被占用: Windows=10048, Mac/Linux=48或98
+            if e.errno in (10048, 48, 98):
                 print(f"[MCP] 端口 {port} 被占用，尝试 {port + 1}", file=sys.stderr)
                 port += 1
             else:
