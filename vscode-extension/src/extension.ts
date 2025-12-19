@@ -616,6 +616,11 @@ function getWebviewContent(reason: string, requestId: string): string {
     <div class="shortcuts">
       快捷键: <kbd>Enter</kbd> = 继续 | <kbd>Shift</kbd>+<kbd>Enter</kbd> = 换行 | <kbd>Esc</kbd> = 结束
     </div>
+    
+    <div class="footer" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--vscode-panel-border, #454545); font-size: 11px; color: var(--vscode-descriptionForeground, #888888); text-align: center;">
+      <div>二次开发 by <a href="https://github.com/1837620622" target="_blank" style="color: var(--vscode-textLink-foreground, #3794ff);">@1837620622</a></div>
+      <div style="margin-top: 5px;">如果觉得好用，请给个 ⭐ Star</div>
+    </div>
   </div>
   
   <script>
