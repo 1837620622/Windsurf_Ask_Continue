@@ -8,12 +8,13 @@
 #   3. 两个都失败则进入重试机制（各 5 次，每次间隔 5 秒）
 # ============================================================
 
-# 获取脚本所在目录（~/Documents/mcp 或项目目录）
+# 获取脚本所在目录（mcp-server-go 目录）
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 
-# 服务器路径（都在同一目录下）
+# 服务器路径
 GO_SERVER="$SCRIPT_DIR/ask-continue-mcp"
-PY_SERVER="$SCRIPT_DIR/mcp-server-python/server.py"
+PY_SERVER="$PROJECT_DIR/mcp-server-python/server.py"
 
 # 重试配置
 MAX_RETRIES=5
