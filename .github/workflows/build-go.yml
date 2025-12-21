@@ -1,0 +1,117 @@
+# ============================================================
+# GitHub Actions 工作流：自动编译 Go MCP 服务器
+# 支持 Windows 和 Mac/Linux 平台
+# ============================================================
+name: Build Go MCP Server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mcp-server-go/**'
+      - '.github/workflows/build-go.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'mcp-server-go/**'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ============================================================
+      # 检出代码
+      # ============================================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ============================================================
+      # 设置 Go 环境
+      # ============================================================
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: mcp-server-go/go.sum
+
+      # ============================================================
+      # 下载依赖
+      # ============================================================
+      - name: Download dependencies
+        working-directory: mcp-server-go
+        run: go mod download
+
+      # ============================================================
+      # 编译 Windows 版本 (64位)
+      # ============================================================
+      - name: Build for Windows (amd64)
+        working-directory: mcp-server-go
+        run: |
+          GOOS=windows GOARCH=amd64 go build -o ask-continue-mcp-windows-amd64.exe server.go
+          echo "Windows amd64 build completed"
+
+      # ============================================================
+      # 编译 Mac 版本 (Intel)
+      # ============================================================
+      - name: Build for macOS (amd64)
+        working-directory: mcp-server-go
+        run: |
+          GOOS=darwin GOARCH=amd64 go build -o ask-continue-mcp-darwin-amd64 server.go
+          echo "macOS amd64 build completed"
+
+      # ============================================================
+      # 编译 Mac 版本 (Apple Silicon)
+      # ============================================================
+      - name: Build for macOS (arm64)
+        working-directory: mcp-server-go
+        run: |
+          GOOS=darwin GOARCH=arm64 go build -o ask-continue-mcp-darwin-arm64 server.go
+          echo "macOS arm64 build completed"
+
+      # ============================================================
+      # 编译 Linux 版本 (64位)
+      # ============================================================
+      - name: Build for Linux (amd64)
+        working-directory: mcp-server-go
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o ask-continue-mcp-linux-amd64 server.go
+          echo "Linux amd64 build completed"
+
+      # ============================================================
+      # 上传构建产物
+      # ============================================================
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ask-continue-mcp-windows-amd64
+          path: mcp-server-go/ask-continue-mcp-windows-amd64.exe
+
+      - name: Upload macOS Intel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ask-continue-mcp-darwin-amd64
+          path: mcp-server-go/ask-continue-mcp-darwin-amd64
+
+      - name: Upload macOS Apple Silicon artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ask-continue-mcp-darwin-arm64
+          path: mcp-server-go/ask-continue-mcp-darwin-arm64
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ask-continue-mcp-linux-amd64
+          path: mcp-server-go/ask-continue-mcp-linux-amd64
+
+      # ============================================================
+      # 显示构建结果
+      # ============================================================
+      - name: List build artifacts
+        working-directory: mcp-server-go
+        run: |
+          echo "Build artifacts:"
+          ls -la ask-continue-mcp-*
