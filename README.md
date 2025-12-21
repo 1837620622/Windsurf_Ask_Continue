@@ -242,7 +242,46 @@ pip install -r requirements.txt
 
 创建或编辑 MCP 配置文件：
 - **Windows**: `C:\Users\你的用户名\.codeium\windsurf\mcp_config.json`
-- **Mac**: `~/.codeium/windsurf/mcp_config.json`
+- **Mac/Linux**: `~/.codeium/windsurf/mcp_config.json`
+
+**方式 A：使用 Go 版本（推荐，连接更稳定）**
+
+```json
+{
+  "mcpServers": {
+    "ask-continue": {
+      "command": "你的完整路径/mcp-server-go/ask-continue-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+**Windows 示例**：
+```json
+{
+  "mcpServers": {
+    "ask-continue": {
+      "command": "F:/Projects/Windsurf_Ask_Continue/mcp-server-go/ask-continue-mcp.exe",
+      "args": []
+    }
+  }
+}
+```
+
+**Mac/Linux 示例**：
+```json
+{
+  "mcpServers": {
+    "ask-continue": {
+      "command": "/Users/你的用户名/Windsurf_Ask_Continue/mcp-server-go/ask-continue-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+**方式 B：使用 Python 版本**
 
 ```json
 {
@@ -255,9 +294,35 @@ pip install -r requirements.txt
 }
 ```
 
+**Windows 示例**：
+```json
+{
+  "mcpServers": {
+    "ask-continue": {
+      "command": "python",
+      "args": ["F:/Projects/Windsurf_Ask_Continue/mcp-server-python/server.py"]
+    }
+  }
+}
+```
+
+**Mac/Linux 示例**：
+```json
+{
+  "mcpServers": {
+    "ask-continue": {
+      "command": "python3",
+      "args": ["/Users/你的用户名/Windsurf_Ask_Continue/mcp-server-python/server.py"]
+    }
+  }
+}
+```
+
 **注意**：
 - 路径使用正斜杠 `/` 或双反斜杠 `\\`
-- 路径必须是绝对路径，例如 `F:/Projects/Windsurf_Ask_Continue/mcp-server-python/server.py`
+- 路径必须是绝对路径
+- Windows 上 Go 版本需要 `.exe` 后缀
+- Mac/Linux 上 Python 命令可能是 `python3`
 
 #### 步骤 4：配置全局规则
 
