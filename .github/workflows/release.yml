@@ -5,7 +5,8 @@
 # 功能：
 #   1. 安装依赖并编译 TypeScript
 #   2. 打包生成 VSIX 文件
-#   3. 创建 GitHub Release 并上传 VSIX
+#   3. 编译 Go MCP Server（多平台）
+#   4. 创建 GitHub Release 并上传所有文件
 # ============================================================
 
 name: 发布 Release
@@ -34,23 +35,46 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
-      # ========== 步骤 3：安装依赖 ==========
+      # ========== 步骤 3：设置 Go 环境 ==========
+      - name: 设置 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: mcp-server-go/go.sum
+      
+      # ========== 步骤 4：安装 Node 依赖 ==========
       - name: 安装依赖
         run: npm ci
       
-      # ========== 步骤 4：编译 TypeScript ==========
+      # ========== 步骤 5：编译 TypeScript ==========
       - name: 编译 TypeScript
         run: npm run compile
       
-      # ========== 步骤 5：安装 vsce 打包工具 ==========
+      # ========== 步骤 6：安装 vsce 打包工具 ==========
       - name: 安装 vsce
         run: npm install -g @vscode/vsce
       
-      # ========== 步骤 6：打包 VSIX ==========
+      # ========== 步骤 7：打包 VSIX ==========
       - name: 打包 VSIX
         run: vsce package --no-dependencies
       
-      # ========== 步骤 7：获取版本号 ==========
+      # ========== 步骤 8：编译 Go 多平台版本 ==========
+      - name: 编译 Go MCP Server（多平台）
+        working-directory: mcp-server-go
+        run: |
+          # Windows 64位
+          GOOS=windows GOARCH=amd64 go build -o ask-continue-mcp-windows-amd64.exe server.go
+          # Mac Intel
+          GOOS=darwin GOARCH=amd64 go build -o ask-continue-mcp-darwin-amd64 server.go
+          # Mac Apple Silicon
+          GOOS=darwin GOARCH=arm64 go build -o ask-continue-mcp-darwin-arm64 server.go
+          # Linux 64位
+          GOOS=linux GOARCH=amd64 go build -o ask-continue-mcp-linux-amd64 server.go
+          echo "Go 多平台编译完成："
+          ls -la ask-continue-mcp-*
+      
+      # ========== 步骤 9：获取版本号 ==========
       - name: 获取版本号
         id: get_version
         run: |
@@ -58,7 +82,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "版本号: $VERSION"
       
-      # ========== 步骤 8：创建 Release 并上传 VSIX ==========
+      # ========== 步骤 10：创建 Release 并上传文件 ==========
       - name: 创建 Release
         uses: softprops/action-gh-release@v1
         with:
@@ -66,11 +90,22 @@ jobs:
           body: |
             ## 🚀 Windsurf 对话增强工具 v${{ steps.get_version.outputs.version }}
             
-            ### 📦 安装方式
-            1. 下载下方的 `.vsix` 文件
-            2. 在 Windsurf 中按 `Ctrl+Shift+P`（Mac: `Cmd+Shift+P`）
-            3. 输入 `Extensions: Install from VSIX`
-            4. 选择下载的 VSIX 文件
+            ### 📦 下载说明
+            
+            | 文件 | 说明 |
+            |------|------|
+            | `*.vsix` | Windsurf 扩展（必须安装） |
+            | `install.bat` / `install.sh` | 一键安装脚本 |
+            | `ask-continue-mcp-windows-amd64.exe` | Windows Go 版本 |
+            | `ask-continue-mcp-darwin-arm64` | Mac Apple Silicon Go 版本 |
+            | `ask-continue-mcp-darwin-amd64` | Mac Intel Go 版本 |
+            | `ask-continue-mcp-linux-amd64` | Linux Go 版本 |
+            
+            ### 📝 安装方式
+            1. 下载 `.vsix` 文件和对应平台的安装脚本
+            2. 运行安装脚本（Windows: `install.bat`，Mac/Linux: `./install.sh`）
+            3. 按提示安装 VSIX 扩展
+            4. **重启 Windsurf**
             
             ### 📝 更新内容
             请查看 [README.md](https://github.com/${{ github.repository }}/blob/main/README.md#-更新日志) 中的更新日志。
@@ -84,6 +119,10 @@ jobs:
             install.sh
             uninstall.bat
             uninstall.sh
+            mcp-server-go/ask-continue-mcp-windows-amd64.exe
+            mcp-server-go/ask-continue-mcp-darwin-amd64
+            mcp-server-go/ask-continue-mcp-darwin-arm64
+            mcp-server-go/ask-continue-mcp-linux-amd64
           draft: false
           prerelease: false
         env:
