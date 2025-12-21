@@ -998,10 +998,10 @@ function getWebviewContent(reason: string, requestId: string): string {
     <div class="reason-card">
       <div class="reason-header">
         <span class="reason-icon">📢</span>
-        <span class="reason-label" data-zh="公告 · v1.3.1" data-en="Announcement · v1.3.1">公告 · v1.3.1</span>
+        <span class="reason-label" data-zh="公告 · v1.3.2" data-en="Announcement · v1.3.2">公告 · v1.3.2</span>
       </div>
       <div class="reason-text">
-        <div data-zh="🌐 新增中英文切换 | ⌨️ Win/Mac快捷键适配 | 🐛 修复乱码问题" data-en="🌐 Language Switch | ⌨️ Win/Mac Shortcuts | 🐛 Bug Fixes">🌐 新增中英文切换 | ⌨️ Win/Mac快捷键适配 | 🐛 修复乱码问题</div>
+        <div data-zh="🔧 连接优化 | 🐍 Python优先 | ⏰ 超时延长 | 🧹 进程清理" data-en="🔧 Connection Fix | 🐍 Python First | ⏰ Timeout Extended | 🧹 Process Cleanup">🔧 连接优化 | 🐍 Python优先 | ⏰ 超时延长 | 🧹 进程清理</div>
         <div style="margin-top: 8px; font-size: 12px; color: #6b7280;" data-zh="GitHub: github.com/1837620622 · 二次开发: 传康KK" data-en="GitHub: github.com/1837620622 · Dev: ChuanKang KK">GitHub: github.com/1837620622 · 二次开发: 传康KK</div>
       </div>
     </div>
