@@ -408,14 +408,14 @@ pip install -r requirements.txt
 ```
 ├── install.bat              # 一键安装脚本（Windows）
 ├── install.sh               # 一键安装脚本（Mac/Linux）
-├── mcp-launcher.sh          # 智能启动器（Go优先→Python备选→自动重试）
 ├── uninstall.bat            # 卸载脚本（Windows）
 ├── uninstall.sh             # 卸载脚本（Mac/Linux）
 ├── .github/workflows/       # GitHub Actions 自动化
 │   └── build-go.yml         # 自动编译 Go 多平台版本
 ├── mcp-server-go/           # MCP 服务器（Go 版本，推荐）
 │   ├── server.go            # 主程序
-│   └── ask-continue-mcp     # 编译后的可执行文件
+│   ├── ask-continue-mcp     # 编译后的可执行文件
+│   └── mcp-launcher.sh      # 智能启动器脚本
 ├── mcp-server-python/       # MCP 服务器（Python 版本）
 │   ├── server.py            # 主程序
 │   └── requirements.txt     # Python 依赖

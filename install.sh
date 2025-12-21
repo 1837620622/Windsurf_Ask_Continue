@@ -113,7 +113,7 @@ WINDSURF_MCP_DIR="$HOME/.codeium/windsurf"
 WINDSURF_MCP_FILE="$WINDSURF_MCP_DIR/mcp_config.json"
 PYTHON_SERVER_PATH="$SCRIPT_DIR/mcp-server-python/server.py"
 GO_SERVER_PATH="$SCRIPT_DIR/mcp-server-go/ask-continue-mcp"
-LAUNCHER_PATH="$SCRIPT_DIR/mcp-launcher.sh"
+LAUNCHER_PATH="$SCRIPT_DIR/mcp-server-go/mcp-launcher.sh"
 
 # 创建目录
 mkdir -p "$WINDSURF_MCP_DIR"
